@@ -37,10 +37,12 @@ export async function encryptText(key: CryptoKey, text: string): Promise<Encrypt
 }
 
 export async function decryptText(key: CryptoKey, blob: EncryptedBlob): Promise<string> {
+  const iv = unb64(blob.iv);
+  const ct = unb64(blob.ct);
   const pt = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: unb64(blob.iv) },
+    { name: "AES-GCM", iv: new Uint8Array(iv) },
     key,
-    unb64(blob.ct),
+    new Uint8Array(ct),
   );
   return new TextDecoder().decode(pt);
 }
