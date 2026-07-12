@@ -6,6 +6,12 @@ export interface EncryptedBlob {
   ct: string; // base64
 }
 
+function toAB(u8: Uint8Array): ArrayBuffer {
+  const ab = new ArrayBuffer(u8.byteLength);
+  new Uint8Array(ab).set(u8);
+  return ab;
+}
+
 function b64(buf: ArrayBuffer): string {
   const bytes = new Uint8Array(buf);
   let s = "";
@@ -28,21 +34,20 @@ export async function generateSessionKey(): Promise<CryptoKey> {
 
 export async function encryptText(key: CryptoKey, text: string): Promise<EncryptedBlob> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = new TextEncoder().encode(text);
   const ct = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-GCM", iv: toAB(iv) },
     key,
-    new TextEncoder().encode(text),
+    toAB(data),
   );
-  return { iv: b64(iv.buffer), ct: b64(ct) };
+  return { iv: b64(toAB(iv)), ct: b64(ct) };
 }
 
 export async function decryptText(key: CryptoKey, blob: EncryptedBlob): Promise<string> {
-  const iv = unb64(blob.iv);
-  const ct = unb64(blob.ct);
   const pt = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: new Uint8Array(iv) },
+    { name: "AES-GCM", iv: toAB(unb64(blob.iv)) },
     key,
-    new Uint8Array(ct),
+    toAB(unb64(blob.ct)),
   );
   return new TextDecoder().decode(pt);
 }
