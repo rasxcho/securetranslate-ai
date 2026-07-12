@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CyberBackground } from "../components/cyber-background";
+import { CartoonyIntro } from "../components/cartoony-intro";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -134,6 +135,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <CyberBackground />
+      <CartoonyIntro />
       <Outlet />
       <Toaster theme="dark" position="top-right" />
     </QueryClientProvider>
